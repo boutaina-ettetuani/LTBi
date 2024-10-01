@@ -1,0 +1,127 @@
+
+library(biomaRt)
+#The following command shows the databases that are available to retrive information
+listMarts()
+#We will choose ENSEMBL_MART_ENSEMBL, which correspond to Ensembl Genes 90
+#It is necessary to creat a object of the type "Mart" to load the database information. This is performed with the following command:
+mart <- useMart("ENSEMBL_MART_ENSEMBL")
+mart2 <- useMart("ENSEMBL_MART_SNP")
+mart3 <- useMart("ENSEMBL_MART_FUNCGEN")
+#mart <- useMart("ENSEMBL_MART_ENSEMBL", host = "http://aug2017.archive.ensembl.org", 
+#dataset = "hsapiens_gene_ensembl")
+#Once the object mart was created using useMart() function, we need to select the organism. The following comand can be used to identify the correspondent argument to each organism
+datasets <- listDatasets(mart)
+datasets2 <- listDatasets(mart2)
+datasets3 <- listDatasets(mart3)
+
+head(datasets)
+head(datasets2)
+
+#54           hsapiens_gene_ensembl                                     Human genes (GRCh38.p12)
+#The function useDataset() can be used to insert the organism infortation in the mart object
+mart <- useDataset("hsapiens_gene_ensembl", mart)
+mart2 <- useDataset("hsapiens_snp", mart2)
+mart3 <- useDataset("hsapiens_regulatory_feature", mart3)
+
+#The following command can be used to list the filters available to use in the retriving process
+listFilters(mart)
+listFilters(mart2)
+listFilters(mart3)
+####################################
+attributes = listAttributes(mart)
+attributes2 = listAttributes(mart2)
+attributes3 = listAttributes(mart3)
+
+attributes[1:5,]
+filters = listFilters(mart)
+filters2 = listFilters(mart2)
+filters3 = listFilters(mart3)
+
+length(unique(goterms))
+
+get_Genes_1= getBM(attributes=c('hgnc_symbol' ,'go_id'),
+                           filters = 'go', 
+                           values = unique(goterms[1:450]),
+                           mart = mart,
+                           useCache = FALSE) 
+get_Genes_1
+
+get_Genes_2= getBM(attributes=c('hgnc_symbol' ,'go_id'),
+                   filters = 'go', 
+                   values = unique(goterms[450:900]),
+                   mart = mart,
+                   useCache = FALSE) 
+get_Genes_2
+
+get_Genes_3= getBM(attributes=c('hgnc_symbol' ,'go_id'),
+                   filters = 'go', 
+                   values = unique(goterms[900:1350]),
+                   mart = mart,
+                   useCache = FALSE) 
+get_Genes_3
+get_Genes_4= getBM(attributes=c('hgnc_symbol' ,'go_id'),
+                   filters = 'go', 
+                   values = unique(goterms[1350:1500]),
+                   mart = mart,
+                   useCache = FALSE) 
+get_Genes_4
+get_Genes_5= getBM(attributes=c('hgnc_symbol' ,'go_id'),
+                   filters = 'go', 
+                   values = unique(goterms[1500:1950]),
+                   mart = mart,
+                   useCache = FALSE) 
+get_Genes_5
+get_Genes_6= getBM(attributes=c('hgnc_symbol' ,'go_id'),
+                   filters = 'go', 
+                   values = unique(goterms[1950:2350]),
+                   mart = mart,
+                   useCache = FALSE) 
+get_Genes_6
+
+get_Genes_7= getBM(attributes=c('hgnc_symbol' ,'go_id'),
+                   filters = 'go', 
+                   values = unique(goterms[2350:2764]),
+                   mart = mart,
+                   useCache = FALSE) 
+get_Genes_7
+
+
+goterms_get_Genes_rbind <- rbind(get_Genes_1,get_Genes_2,get_Genes_3,get_Genes_4,get_Genes_5,get_Genes_6,
+                                 get_Genes_7)
+
+length(unique(goterms_get_Genes_rbind$hgnc_symbol))
+length(unique(df_mat_Regu_gene_subset))
+length(unique(gene_symbol_mat))
+library(systemPipeR)
+setlist_symbol_tot <- list(goterms_get_Genes_rbind=unique(goterms_get_Genes_rbind$hgnc_symbol),df_mat_Regu_gene_subset =unique(df_mat_Regu_gene_subset))
+setlist_symbol_tot2 <- list(goterms_get_Genes_rbind=unique(goterms_get_Genes_rbind$hgnc_symbol),gene_symbol_mat =unique(gene_symbol_mat))
+vennset2_symbol_tot <- overLapper(setlist_symbol_tot[1:2], type="vennsets")
+vennset2_symbol_tot2 <- overLapper(setlist_symbol_tot2[1:2], type="vennsets")
+
+vennPlot(vennset2_symbol_tot)
+vennPlot(vennset2_symbol_tot2)
+
+
+toy = Venn(setlist_symbol_tot)
+overlap(toy)
+length(unique(overlap(toy)))
+
+
+setlist_symbol_tot3 <- list(overlaap =unique(overlap(toy)),gene_symbol_mat =unique(gene_symbol_mat))
+vennset2_symbol_tot3 <- overLapper(setlist_symbol_tot3[1:2], type="vennsets")
+vennPlot(vennset2_symbol_tot3)
+
+
+toy_ensembl <-  AnnotationDbi::select(hgu133plus2.db,
+                                       keys = unique(overlap(toy)),
+                                       columns = c("SYMBOL", "GENENAME","ENSEMBL","ENTREZID"),
+                                       keytype = "SYMBOL")
+
+
+id <- unique(toy_ensembl$ENSEMBL)
+getHpa <- getHpa(id, hpadata = "hpaNormalTissue")
+
+getHpa(id, type = "details")
+
+data1 <- gene2disease( gene = unique(toy_ensembl$ENTREZID), vocabulary = "ENTREZ",
+                       database = "CURATED")

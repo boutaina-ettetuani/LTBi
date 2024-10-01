@@ -1,0 +1,36 @@
+
+#remotes::install_github("moosa-r/rbioapi")
+library("rbioapi")
+mirs <- row.names(example4.counts)
+mieaa_all <- rba_mieaa_enrich(test_set = mirs,
+                              mirna_type = "mature",
+                              test_type = "ORA",
+                              species = 9606)
+mieaa_all
+
+rba_mieaa_enrich_results <- rba_mieaa_enrich_results("5c9a78b0-6157-41e3-9057-0cbba4da08ac")
+rba_mieaa_enrich_results
+
+mieaa_enrich <- rba_mieaa_enrich(test_set = mieaa_all$`miRNAs/precursors`,
+                                 mirna_type = "mature",
+                                 test_type = "GSEA",
+                                 species = 9606,
+                                 categories = "miRPathDB_GO_Biological_process_mature")
+mieaa_enrich
+
+GO_Annotations_mature_mieaa_enrich <- rba_mieaa_enrich(test_set = mirs,
+                                                      mirna_type = "mature",
+                                                      test_type = "ORA",
+                                                      species = 9606,
+                                                      categories = "MNDR_mature")
+GO_Annotations_mature_mieaa_enrich
+
+
+miRPathDB_GO_Biological_process_mature
+
+rba_string_network_image(ids = unique(results_gene2dis_data$gene_symbol),
+                         species = 9606,
+                         save_image = TRUE)
+
+
+miRBaseConverter

@@ -1,0 +1,97 @@
+
+
+## ----eval=TRUE----------------------------------------------------------------
+library(TissueEnrich)
+inputGenes<-geneltbis
+gs<-GeneSet(geneIds=inputGenes,organism="Homo Sapiens",geneIdType=SymbolIdentifier())
+output<-teEnrichment(inputGenes = gs)
+
+## ----eval=TRUE----------------------------------------------------------------
+seEnrichmentOutput<-output[[1]]
+enrichmentOutput<-setNames(data.frame(assay(seEnrichmentOutput),row.names = rowData(seEnrichmentOutput)[,1]), colData(seEnrichmentOutput)[,1])
+enrichmentOutput$Tissue<-row.names(enrichmentOutput)
+head(enrichmentOutput)
+ggplot(enrichmentOutput,aes(x=reorder(Tissue,-Log10PValue),y=Log10PValue,label = Tissue.Specific.Genes,fill = Tissue))+
+  geom_bar(stat = 'identity')+
+  labs(x='', y = '-LOG10(P-Adjusted)')+
+  theme_bw()+
+  theme(legend.position="none")+
+  theme(plot.title = element_text(hjust = 0.5,size = 20),axis.title = element_text(size=15))+
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),panel.grid.major= element_blank(),panel.grid.minor = element_blank())
+
+## ----eval=TRUE----------------------------------------------------------------
+ggplot(enrichmentOutput,aes(x=reorder(Tissue,-fold.change),y=fold.change,label = Tissue.Specific.Genes,fill = Tissue))+
+  geom_bar(stat = 'identity')+
+  labs(x='', y = 'Fold change')+
+  theme_bw()+
+  theme(legend.position="none")+
+  theme(plot.title = element_text(hjust = 0.5,size = 20),axis.title = element_text(size=15))+
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),panel.grid.major= element_blank(),panel.grid.minor = element_blank())
+
+## ----eval=TRUE----------------------------------------------------------------
+library(tidyr)
+seExp<-output[[2]][["Lung"]]
+exp<-setNames(data.frame(assay(seExp), row.names = rowData(seExp)[,1]), colData(seExp)[,1])
+exp$Gene<-row.names(exp)
+exp<-exp %>% gather(key = "Tissue", value = "expression",1:(ncol(exp)-1))
+
+ggplot(exp, aes(Tissue, Gene)) + geom_tile(aes(fill = expression),
+                                           colour = "white") + scale_fill_gradient(low = "white",
+                                                                                   high = "steelblue")+
+  labs(x='', y = '')+
+  theme_bw()+
+  guides(fill = guide_legend(title = "Log2(TPM)"))+
+  #theme(legend.position="none")+
+  theme(plot.title = element_text(hjust = 0.5,size = 20),axis.title = element_text(size=15))+
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),panel.grid.major= element_blank(),panel.grid.minor = element_blank())
+
+
+## ----eval=TRUE----------------------------------------------------------------
+seGroupInf<-output[[3]][["Lung"]]
+groupInf<-data.frame(assay(seGroupInf))
+print(head(groupInf))
+
+## ----eval=TRUE----------------------------------------------------------------
+print(geneIds(output[[4]]))
+
+## ----eval=TRUE----------------------------------------------------------------
+library(TissueEnrich)
+library(ggplot2)
+
+gs<-GeneSet(geneIds=inputGenes,organism="Homo Sapiens",geneIdType=SymbolIdentifier())
+output<-teEnrichment(inputGenes = gs,rnaSeqDataset = 3)
+seEnrichmentOutput<-output[[1]]
+enrichmentOutput<-setNames(data.frame(assay(seEnrichmentOutput), row.names = rowData(seEnrichmentOutput)[,1]), colData(seEnrichmentOutput)[,1])
+enrichmentOutput$Tissue<-row.names(enrichmentOutput)
+ggplot(enrichmentOutput,aes(x=reorder(Tissue,-Log10PValue),y=Log10PValue,label = Tissue.Specific.Genes,fill = Tissue))+
+  geom_bar(stat = 'identity')+
+  labs(x='', y = '-LOG10(P-Adjusted)')+
+  theme_bw()+
+  theme(legend.position="none")+
+  theme(plot.title = element_text(hjust = 0.5,size = 20),axis.title = element_text(size=15))+
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),panel.grid.major= element_blank(),panel.grid.minor = element_blank())
+
+## ----eval=TRUE----------------------------------------------------------------
+library(TissueEnrich)
+library(SummarizedExperiment)
+data<-system.file("extdata", "test.expressiondata.txt", package = "TissueEnrich")
+expressionData<-read.table(data,header=TRUE,row.names=1,sep='\t')
+se<-SummarizedExperiment(assays = SimpleList(as.matrix(expressionData)),rowData = row.names(expressionData),colData = colnames(expressionData))
+output<-teGeneRetrieval(se)
+head(assay(output))
+
+## ----eval=FALSE---------------------------------------------------------------
+#  library(TissueEnrich)
+#  library(ggplot2)
+#  genes<-system.file("extdata", "inputGenesEnsembl.txt", package = "TissueEnrich")
+#  inputGenes<-scan(genes,character())
+#  gs<-GeneSet(geneIds=inputGenes)
+#  output2<-teEnrichmentCustom(gs,output)
+#  enrichmentOutput<-setNames(data.frame(assay(output2[[1]]), row.names = rowData(output2[[1]])[,1]), colData(output2[[1]])[,1])
+#  ggplot(enrichmentOutput,aes(x=reorder(Tissue,-Log10PValue),y=Log10PValue,label = Tissue.Specific.Genes,fill = Tissue))+
+#        geom_bar(stat = 'identity')+
+#        labs(x='', y = '-LOG10(P-Adjusted)')+
+#        theme_bw()+
+#        theme(legend.position="none")+
+#        theme(plot.title = element_text(hjust = 0.5,size = 20),axis.title = element_text(size=15))+
+#        theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),panel.grid.major= element_blank(),panel.grid.minor = element_blank())

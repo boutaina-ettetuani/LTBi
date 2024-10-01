@@ -1,0 +1,25 @@
+library(readr)
+selection_seuil_0_0001_norm1 <- read_csv("selection_seuil_0_0001_norm1.csv")
+
+
+
+selection_seuil_0_0001_norm1 <-  selection_seuil_0_0001_norm1[order(selection_seuil_0_0001_norm1$FreqRow, decreasing = TRUE), ]
+View(selection_seuil_0_0001_norm1)
+View(ans)
+
+
+
+
+# loading library
+library("dplyr")
+
+
+ans <- selection_seuil_0_0001_norm1 %>% group_by(SYMBOL) %>% slice(which.max(Selectionscore))
+
+dim(selection_seuil_0_0001_norm1)
+dim(ans)
+
+
+ans <-  ans[order(ans$FreqRow, decreasing = TRUE), ]
+
+write.csv(ans, file = 'C:/Users/hp/Desktop/selection_seuil_0_0001_norm1.csv', row.names = FALSE)

@@ -1,0 +1,57 @@
+
+library("hpar")
+
+## ----getHpa-------------------------------------------------------------------
+id <- toydd$ENSEMBL
+#Normal tissue data: Expression profiles for proteins in human tissues based on immunohistochemisty using tissue micro arrays.
+getHpa1 <- getHpa(id, hpadata = "hpaNormalTissue")
+getHpa11 <-getHpa1[which( getHpa1$Tissue%in% "lung"),]
+library("dplyr") 
+colnames(getHpa11)[2] <- "SYMBOL"
+library(readxl)
+tissuesDB <- read_excel("tissuesDB.xlsx")
+datafull_join_getHpa11 <- dplyr::full_join(getHpa11[,c("Gene","SYMBOL","Tissue","Cell.type","Level","Reliability")], 
+                                           tissuesDB[,c("SYMBOL","TissuesScore")], by='SYMBOL')
+
+library("dplyr")
+
+datafull_join_getHpa11 |>
+  filter(Reliability == "Approved",
+         Level == "High") |>
+  arrange(desc("TissuesScore")) |>
+  head()
+
+datafull_join_getHpa111 <- datafull_join_getHpa11 |>
+  filter(Reliability == "Approved",
+         Level == "High") |>
+  arrange(desc("TissuesScore")) |>
+  head()
+
+
+datafull_join_getHpa1a <- datafull_join_getHpa11 |>
+  filter(Reliability == "Approved",
+         Level == "High") |>
+  head()
+View(datafull_join_getHpa1a)
+
+datafull_join_getHpa1b <-  datafull_join_getHpa11[order(datafull_join_getHpa11$TissuesScore, decreasing = TRUE), ]
+
+View(datafull_join_getHpa1b)
+
+#head(getHpa(id, hpadata = "hpaNormalTissue"))
+getHpa2 <-getHpa(id, hpadata = "hpaSubcellularLoc")
+colnames(getHpa2)[2] <- "SYMBOL"
+datafull_join_getHpa22 <- dplyr::full_join(datafull_join_getHpa11, 
+                                           getHpa2, by='SYMBOL')
+
+
+datafull_join_getHpa222 <- datafull_join_getHpa22 |>
+  filter(Reliability.x == c("Approved","Enhanced")) |>
+  arrange(desc("TissuesScore")) |>
+  head()
+View(datafull_join_getHpa222)
+#head(getHpa(id, hpadata = "rnaGeneCellLine"))
+getHpa3 <-getHpa(id, hpadata = "rnaGeneCellLine")
+## ----getHpa2, eval=FALSE------------------------------------------------------
+#  getHpa(id, type = "details")
+
